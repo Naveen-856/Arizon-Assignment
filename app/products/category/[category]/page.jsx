@@ -1,16 +1,22 @@
 import ProductCard from "@/components/ProductCard";
 
 async function getCategoryProducts(category) {
-  const res = await fetch(
-    `https://fakestoreapi.com/products/category/${category}`,
-    { cache: "no-store" }
-  );
+  try {
+    const res = await fetch(
+      `https://fakestoreapi.com/products/category/${category}`,
+      { cache: "no-store" }
+    );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch category products");
+    if (!res.ok) {
+      console.error("API error:", res.status, res.statusText);
+      return [];
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Failed to fetch category products:", error);
+    return [];
   }
-
-  return res.json();
 }
 
 export default async function CategoryPage({ params }) {
@@ -23,11 +29,17 @@ export default async function CategoryPage({ params }) {
         {category.replace("%20", " ")}
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">Unable to load products in this category. Please try again later.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }

@@ -1,20 +1,37 @@
 import AddToCartButton from "@/components/AddToCartButton";
 
 async function getProduct(id) {
-  const res = await fetch(`https://fakestoreapi.com/products/${id}`, {
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`https://fakestoreapi.com/products/${id}`, {
+      cache: "no-store",
+    });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch product");
+    if (!res.ok) {
+      console.error("API error:", res.status, res.statusText);
+      return null;
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Failed to fetch product:", error);
+    return null;
   }
-
-  return res.json();
 }
 
 export default async function ProductDetailPage({ params }) {
   const { id } = await params; 
   const product = await getProduct(id);
+
+  if (!product) {
+    return (
+      <main className="p-6 max-w-5xl mx-auto">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <p className="text-gray-500">Unable to load product details. Please try again later.</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="p-6 max-w-5xl mx-auto">
